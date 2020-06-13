@@ -93,6 +93,8 @@ def test(args):
         pred = misc.imresize(pred, orig_size, "nearest", mode="F")
 
     decoded = loader.decode_segmap(pred)
+    print(decoded.shape)
+    print(decoded.sum())
     print("Classes found: ", np.unique(pred))
     misc.imsave(args.out_path, decoded)
     print("Segmentation Mask Saved at: {}".format(args.out_path))

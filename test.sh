@@ -1,0 +1,1 @@
+python test.py --dataset pascal --model_path /home/fengmingquan/output/pytorch-semseg/runs/fcn8s_pascal/66576/fcn8s_pascal_best_model.pkl --img_path /home/fengmingquan/data/VOC2012/VOCdevkit/VOC2012/JPEGImages/2007_000032.jpg --out_path ./2007_000032_2.png

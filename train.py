@@ -40,9 +40,14 @@ def train(cfg, writer, logger):
     # Setup Dataloader
     data_loader = get_loader(cfg["data"]["dataset"])
     data_path = cfg["data"]["path"]
+    try:
+        sbd_path = cfg["data"]["sbd_path"]
+    except:
+        sbd_path = None
 
     t_loader = data_loader(
-        data_path,
+        root = data_path,
+        sbd_path = sbd_path,
         is_transform=True,
         split=cfg["data"]["train_split"],
         img_size=(cfg["data"]["img_rows"], cfg["data"]["img_cols"]),
@@ -50,7 +55,8 @@ def train(cfg, writer, logger):
     )
 
     v_loader = data_loader(
-        data_path,
+        root = data_path,
+        sbd_path = sbd_path,
         is_transform=True,
         split=cfg["data"]["val_split"],
         img_size=(cfg["data"]["img_rows"], cfg["data"]["img_cols"]),
@@ -118,7 +124,7 @@ def train(cfg, writer, logger):
         for (images, labels) in trainloader:
             i += 1
             start_ts = time.time()
-            scheduler.step()
+            
             model.train()
             images = images.to(device)
             labels = labels.to(device)
@@ -129,7 +135,9 @@ def train(cfg, writer, logger):
             loss = loss_fn(input=outputs, target=labels)
 
             loss.backward()
+            
             optimizer.step()
+            scheduler.step()
 
             time_meter.update(time.time() - start_ts)
 
@@ -152,6 +160,7 @@ def train(cfg, writer, logger):
             ]:
                 model.eval()
                 with torch.no_grad():
+                    print("Start validating")
                     for i_val, (images_val, labels_val) in tqdm(enumerate(valloader)):
                         images_val = images_val.to(device)
                         labels_val = labels_val.to(device)
@@ -195,6 +204,7 @@ def train(cfg, writer, logger):
                         "{}_{}_best_model.pkl".format(cfg["model"]["arch"], cfg["data"]["dataset"]),
                     )
                     torch.save(state, save_path)
+                    print("Update best model at:",save_path)
 
             if (i + 1) == cfg["training"]["train_iters"]:
                 flag = False
@@ -217,7 +227,11 @@ if __name__ == "__main__":
         cfg = yaml.load(fp)
 
     run_id = random.randint(1, 100000)
-    logdir = os.path.join("runs", os.path.basename(args.config)[:-4], str(run_id))
+    try:
+        logroot = cfg["training"]["logroot"]
+    except:
+        logroot = ""
+    logdir = os.path.join(logroot,"runs", os.path.basename(args.config)[:-4], str(run_id))
     writer = SummaryWriter(log_dir=logdir)
 
     print("RUNDIR: {}".format(logdir))

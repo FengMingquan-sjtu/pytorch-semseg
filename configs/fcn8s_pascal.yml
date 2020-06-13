@@ -4,16 +4,16 @@ data:
     dataset: pascal
     train_split: train_aug
     val_split: val
-    img_rows: 'same'
-    img_cols: 'same'
-    path: /private/home/meetshah/datasets/VOC/060817/VOCdevkit/VOC2012/
-    sbd_path: /private/home/meetshah/datasets/VOC/benchmark_RELEASE/
+    img_rows: 500
+    img_cols: 500
+    path: /home/fengmingquan/data/VOC2012/VOCdevkit/VOC2012/
+    sbd_path: /home/fengmingquan/data/benchmark_RELEASE/
 training:
-    train_iters: 300000
-    batch_size: 1
-    val_interval: 1000
+    train_iters: 50000
+    batch_size: 2
+    val_interval: 5000
     n_workers: 16
-    print_interval: 50
+    print_interval: 1000
     optimizer:
         name: 'sgd'
         lr: 1.0e-10
@@ -24,3 +24,4 @@ training:
         size_average: False
     lr_schedule:
     resume: fcn8s_pascal_best_model.pkl
+    logroot: /home/fengmingquan/output/pytorch-semseg

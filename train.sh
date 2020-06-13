@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=2 python train.py --config ./configs/fcn8s_pascal.yml 

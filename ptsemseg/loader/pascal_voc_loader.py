@@ -39,6 +39,10 @@ class pascalVOCLoader(data.Dataset):
                    present in `train_aug` (This is done with the same logic as
                    the validation set used in FCN PAMI paper, but with VOC 2012
                    rather than VOC 2011) - 904 images
+    
+    Download links:
+    SBD :https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/semantic_contours/benchmark.tgz
+    VOC :http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html#devkit
     """
 
     def __init__(
@@ -196,6 +200,7 @@ class pascalVOCLoader(data.Dataset):
         target_path = pjoin(self.root, "SegmentationClass/pre_encoded")
         if not os.path.exists(target_path):
             os.makedirs(target_path)
+        
         path = pjoin(sbd_path, "dataset/train.txt")
         sbd_train_list = tuple(open(path, "r"))
         sbd_train_list = [id_.rstrip() for id_ in sbd_train_list]
