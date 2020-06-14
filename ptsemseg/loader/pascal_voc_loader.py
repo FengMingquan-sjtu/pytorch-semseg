@@ -42,7 +42,7 @@ class pascalVOCLoader(data.Dataset):
     
     Download links:
     SBD :https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/semantic_contours/benchmark.tgz
-    VOC :http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html#devkit
+    VOC :http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
     """
 
     def __init__(

@@ -21,6 +21,7 @@ from ptsemseg.optimizers import get_optimizer
 
 from tensorboardX import SummaryWriter
 import torch.nn.functional as F
+import torch.nn as nn
 
 def train(cfg, writer, logger):
 
@@ -122,6 +123,10 @@ def train(cfg, writer, logger):
     i = start_iter
     flag = True
 
+    use_aux_loss = (cfg["model"]["arch"]=="fcn8s")
+    train_aux_loss = nn.L1Loss(reduction='mean')
+    valid_aux_loss = nn.L1Loss(reduction='mean')
+
     while i <= cfg["training"]["train_iters"] and flag:
         for (images, labels) in trainloader:
             i += 1
@@ -132,12 +137,20 @@ def train(cfg, writer, logger):
             labels = labels.to(device)
 
             optimizer.zero_grad()
-            outputs = model(images)
+            
+            if use_aux_loss:
+                outputs,mid_score = model(images)
+            else:
+                outputs = model(images)
 
             #print("outputs.shape=",outputs.shape,"labels.shape=",labels.shape)
             #raise ValueError
 
             loss = loss_fn(input=outputs, target=labels)
+
+            if use_aux_loss:
+                aux_loss_lambda = cfg["training"]["aux_loss_lambda"]
+                loss = loss + aux_loss_lambda * train_aux_loss(mid_score,torch.zeros(mid_score.shape).to(device))
 
             loss.backward()
             
@@ -170,8 +183,15 @@ def train(cfg, writer, logger):
                         images_val = images_val.to(device)
                         labels_val = labels_val.to(device)
 
-                        outputs = model(images_val)
+                        if use_aux_loss:
+                            outputs,mid_score = model(images)
+                        else:
+                            outputs = model(images)
+
                         val_loss = loss_fn(input=outputs, target=labels_val)
+                        if use_aux_loss:
+                            aux_loss_lambda = cfg["training"]["aux_loss_lambda"]
+                            val_loss = val_loss + aux_loss_lambda * valid_aux_loss(mid_score, torch.zeros(mid_score.shape).to(device))
                         
                         #print("outputs.size()=",outputs.size())
                         #print("labels_val.size()=",labels_val.size())

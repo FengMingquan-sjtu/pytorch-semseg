@@ -291,15 +291,16 @@ class fcn8s(nn.Module):
             nn.MaxPool2d(2, stride=2, ceil_mode=True),
         )
 
-        self.classifier = nn.Sequential(
+        self.classifier_1 = nn.Sequential(
             nn.Conv2d(512, 4096, 7),
             nn.ReLU(inplace=True),
             nn.Dropout2d(),
             nn.Conv2d(4096, 4096, 1),
             nn.ReLU(inplace=True),
-            nn.Dropout2d(),
-            nn.Conv2d(4096, self.n_classes, 1),
+            nn.Dropout2d()
         )
+
+        self.classifier_2 = nn.Conv2d(4096, self.n_classes, 1)
 
         self.score_pool4 = nn.Conv2d(512, self.n_classes, 1)
         self.score_pool3 = nn.Conv2d(256, self.n_classes, 1)
@@ -328,7 +329,8 @@ class fcn8s(nn.Module):
         conv4 = self.conv_block4(conv3)
         conv5 = self.conv_block5(conv4)
 
-        score = self.classifier(conv5)
+        mid_score = self.classifier_1(conv5)
+        score = self.classifier_2(mid_score)
 
         if self.learned_billinear:
             upscore2 = self.upscore2(score)
@@ -344,7 +346,7 @@ class fcn8s(nn.Module):
             out = self.upscore8(score_pool3c + upscore_pool4)[
                 :, :, 31 : 31 + x.size()[2], 31 : 31 + x.size()[3]
             ]
-            return out.contiguous()
+            return out.contiguous(),mid_score
 
         else:
             score_pool4 = self.score_pool4(conv4)
@@ -355,7 +357,7 @@ class fcn8s(nn.Module):
             score += score_pool3
             out = F.upsample(score, x.size()[2:])
 
-        return out
+        return out,mid_score
 
     def init_vgg16_params(self, vgg16, copy_fc8=True):
         blocks = [
@@ -378,12 +380,12 @@ class fcn8s(nn.Module):
                     l2.bias.data = l1.bias.data
         for i1, i2 in zip([0, 3], [0, 3]):
             l1 = vgg16.classifier[i1]
-            l2 = self.classifier[i2]
+            l2 = self.classifier_1[i2]
             l2.weight.data = l1.weight.data.view(l2.weight.size())
             l2.bias.data = l1.bias.data.view(l2.bias.size())
-        n_class = self.classifier[6].weight.size()[0]
+        n_class = self.classifier_2.weight.size()[0]
         if copy_fc8:
             l1 = vgg16.classifier[6]
-            l2 = self.classifier[6]
+            l2 = self.classifier_2
             l2.weight.data = l1.weight.data[:n_class, :].view(l2.weight.size())
             l2.bias.data = l1.bias.data[:n_class]

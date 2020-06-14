@@ -22,6 +22,7 @@ training:
     loss:
         name: 'cross_entropy'
         size_average: True
+    aux_loss_lambda: 0.1
     lr_schedule:
     resume: null
     logroot: /home/fengmingquan/output/pytorch-semseg
