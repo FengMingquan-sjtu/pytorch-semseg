@@ -198,6 +198,7 @@ class unetUp(nn.Module):
             self.up = nn.UpsamplingBilinear2d(scale_factor=2)
 
     def forward(self, inputs1, inputs2):
+        # inputs1 is skip-connection
         outputs2 = self.up(inputs2)
         offset = outputs2.size()[2] - inputs1.size()[2]
         #padding = 2 * [offset // 2, offset // 2]

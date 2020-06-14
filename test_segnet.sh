@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=2 python test.py --dataset pascal --model_path /home/fengmingquan/output/pytorch-semseg/runs/segnet_pascal/11983/segnet_pascal_best_model.pkl --img_path /home/fengmingquan/data/VOC2012/VOCdevkit/VOC2012/JPEGImages/2007_000032.jpg --out_path ./2007_000032_segnet.png

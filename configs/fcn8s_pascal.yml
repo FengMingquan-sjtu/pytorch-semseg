@@ -16,12 +16,12 @@ training:
     print_interval: 1000
     optimizer:
         name: 'sgd'
-        lr: 1.0e-10
+        lr: 1.0e-4
         weight_decay: 0.0005
         momentum: 0.99
     loss:
         name: 'cross_entropy'
-        size_average: False
+        size_average: True
     lr_schedule:
-    resume: fcn8s_pascal_best_model.pkl
+    resume: null
     logroot: /home/fengmingquan/output/pytorch-semseg
