@@ -7,7 +7,7 @@ def cross_entropy2d(input, target, weight=None, size_average=True):
     nt, ht, wt = target.size()
 
     # Handle inconsistent size between input and target
-    if h != ht and w != wt:  # upsample labels
+    if h != ht or w != wt:  # upsample labels
         input = F.interpolate(input, size=(ht, wt), mode="bilinear", align_corners=True)
 
     input = input.transpose(1, 2).transpose(2, 3).contiguous().view(-1, c)

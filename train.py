@@ -20,7 +20,7 @@ from ptsemseg.schedulers import get_scheduler
 from ptsemseg.optimizers import get_optimizer
 
 from tensorboardX import SummaryWriter
-
+import torch.nn.functional as F
 
 def train(cfg, writer, logger):
 
@@ -61,6 +61,8 @@ def train(cfg, writer, logger):
         split=cfg["data"]["val_split"],
         img_size=(cfg["data"]["img_rows"], cfg["data"]["img_cols"]),
     )
+
+    print("Train samples number ={}, Valid samples number={}".format(len(t_loader),len(v_loader)))
 
     n_classes = t_loader.n_classes
     trainloader = data.DataLoader(
@@ -132,6 +134,9 @@ def train(cfg, writer, logger):
             optimizer.zero_grad()
             outputs = model(images)
 
+            #print("outputs.shape=",outputs.shape,"labels.shape=",labels.shape)
+            #raise ValueError
+
             loss = loss_fn(input=outputs, target=labels)
 
             loss.backward()
@@ -167,9 +172,18 @@ def train(cfg, writer, logger):
 
                         outputs = model(images_val)
                         val_loss = loss_fn(input=outputs, target=labels_val)
-
+                        
+                        #print("outputs.size()=",outputs.size())
+                        #print("labels_val.size()=",labels_val.size())
+                        #raise ValueError
+                        # Handle inconsistent size between gt and pred
+                        _, _, h, w = outputs.size()
+                        _, ht, wt = labels_val.size()
+                        if h != ht or w != wt:  # upsample labels
+                            outputs = F.interpolate(outputs, size=(ht, wt), mode="bilinear",align_corners = True)
                         pred = outputs.data.max(1)[1].cpu().numpy()
                         gt = labels_val.data.cpu().numpy()
+
 
                         running_metrics_val.update(gt, pred)
                         val_loss_meter.update(val_loss.item())

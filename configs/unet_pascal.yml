@@ -1,0 +1,28 @@
+model:
+    arch: unet
+data:
+    dataset: pascal
+    train_split: train_aug
+    val_split: val
+    img_rows: 500
+    img_cols: 500
+    path: /home/fengmingquan/data/VOC2012/VOCdevkit/VOC2012/
+    sbd_path: /home/fengmingquan/data/benchmark_RELEASE/
+training:
+    train_iters: 50000
+    batch_size: 4
+    val_interval: 5000
+    n_workers: 16
+    print_interval: 1000
+    optimizer:
+        name: 'sgd'
+        lr: 1.0e-10
+        weight_decay: 0.0005
+        momentum: 0.99
+    loss:
+        name: 'cross_entropy'
+        size_average: False
+    lr_schedule:
+    resume: unet_pascal_best_model.pkl
+    logroot: /home/fengmingquan/output/pytorch-semseg
+random: null
